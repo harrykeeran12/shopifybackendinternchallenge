@@ -9,7 +9,6 @@ const cors = require('cors');
 const bodyparser = require('body-parser');
 
 const {MongoClient} = require('mongodb');
-const e = require('express');
 
 app = express()
 
@@ -22,45 +21,17 @@ let server = {
   port: 3001
 }
 
+const uri = 'mongodb+srv://test:test@inventory.qpxdt.mongodb.net/?retryWrites=true&w=majority';
+const client = new MongoClient(uri);
+client.connect().then((client) =>{
+  database = client.db("logistics");
+  collection = database.collection('inventory');
+})
 
-
-async function main(){
-  const uri = 'mongodb+srv://test:test@inventory.qpxdt.mongodb.net/?retryWrites=true&w=majority';
-  const client = new MongoClient(uri);
-  
-  
-  try {
-    await client.connect();
-    const database = client.db("logistics");
-    const collection = database.collection('inventory')
-    /* await addEntry(collection, {inventory_name: 'find',
-  storage_date: '4022-03-02',
-    inventory_amount : 10}); */
-    /* await findEntry(collection, 'find') */
-    /* await showallEntries(collection) */
-    /*await updateEntrybyName(collection, 'test', {inventory_name: "updated"})*/
-    /* await addEntry(collection, {inventory_name: 'tobedeleted', storage_date: '2003-08-25', inventory_amount: 9}) */
-    /* await deleteEntrybyName(collection, 'tobedeleted') */
-
-
-
-    
-
-   
-
-  } 
-  catch (error) {
-    console.error(error)
-  }
-
-  finally{
-    await client.close();
-  }
-
-}
-
+/* Database functions: */
 
 async function addEntry(collections, inventoryObject){
+
   const entry = await collections.insertOne(inventoryObject);
   
 }
@@ -69,7 +40,7 @@ async function showEntry(collections, inventory_name){
   const entry = await collections.findOne({"inventory_name": inventory_name})
   if(entry){
     console.log(`Found an entry with the name ${inventory_name}.`)
-    console.log(entry)
+    return entry
   }
   else{
     console.log(`No entry found with the name ${inventory_name}. `)
@@ -78,7 +49,7 @@ async function showEntry(collections, inventory_name){
 
 async function showallEntries(collections){
   const allentries = await collections.find({}).toArray();
-  console.log(allentries)
+  return allentries
 }
 
 async function updateEntrybyName(collections, name, inventory_object){
@@ -86,8 +57,13 @@ async function updateEntrybyName(collections, name, inventory_object){
     console.log('Name cannot be blank.')
   }
   else{
-    const updateEntry = await collections.findOneAndUpdate({ inventory_name: "Test" },{ $set: inventory_object})
-    console.log(`Updated ${updateEntry}`)
+    const updateEntry = await collections.findOneAndUpdate({ inventory_name: name },{ $set: inventory_object}).then(()=>{
+      console.log('Found.')
+    }, ()=>{
+      console.log('Not found.')
+    })
+    
+    
   }
 }
 
@@ -97,29 +73,23 @@ async function deleteEntrybyName(collections, name){
     console.log('Name cannot be blank.')
   }
   else{
-    const result = await collections.deleteOne({inventory_name: name})
-    console.log(`Deleted document with the inventory_name ${name}.`)
+    try {
+      const result = await collections.deleteOne({inventory_name: name})
+      console.log(`Deleted document with the inventory_name ${name}.`)
+    } catch (error) {
+      console.log(error)
+    }
+    
   }
   
 }
 
 
 
-main().catch(console.error);
-
-
-
-
-/*TEST to see if server works and is online. */
-
-app.get('/', (req,res) => {
-  res.send('Hello world.')
-});
-
 /*CREATE*/
 
 /*Route to send a value into the database.*/
-app.post('/send', (req, res) => {
+app.post('/send', async function (req, res){
   const body = req.body;
   let inventory_name = body['name'];
   let inventory_amount = body['amount'];
@@ -135,35 +105,62 @@ app.post('/send', (req, res) => {
   } 
   else {
     console.log(inventory_object)
-    res.send(body);
+    const entry = await addEntry(collection, inventory_object)
+    res.send(entry);
   }
   
 });
+
 /*READ*/
 
 /*Route to get one specific value */
-app.get('/:id', (req,res) => {
-  
+app.get('/api/:name', async function (req,res){
+  const entry = await showEntry(collection, req.params.name)
+  if (entry){
+    res.send(entry)
+  }
+  else{
+    res.send(`Did not find an entry with the name ${req.params.name}`)
+  }
 });
 
 /*Route to get all values*/
-app.get('/all', (req,res) => {
-
+app.get('/all', async function (req,res){
+  const entries = await showallEntries(collection)
+  res.send(entries)
 });
 
 /*UPDATE*/
 
 /*Route to update a value*/
-app.put('/update/:id', (req,res) => {
-
+app.put('/update/:name', async function (req,res){
+  let name = req.params.name
+  const update = await updateEntrybyName(collection, name, req.body).then(()=> {
+    res.send(`Updated entry with name ${name}.`)
+  }, () => {
+    res.send(`Unable to update the entry ${name}.`)
+  })
+  
 });
+
 
 /*DELETE*/
 
 /*Route to delete a value*/
-app.delete('/delete/:id', (req,res)=> {
+app.delete('/delete/:name', async function (req,res){
+  const name = req.params.name
+  try {
+    const deleteEntry = await deleteEntrybyName(collection, name).then(()=>{
+    res.send('Deleted the entry.')
+  })
+  } catch (error) {
+    console.log(error)
+
+  }
+  
 
 });
+
 app.listen(server.port, () => console.log(`Server started, listening port: ${server.port}`))
 
 
