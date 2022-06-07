@@ -9,6 +9,7 @@ const cors = require('cors');
 const bodyparser = require('body-parser');
 
 const {MongoClient} = require('mongodb');
+const e = require('express');
 
 app = express()
 
@@ -37,7 +38,9 @@ async function main(){
     inventory_amount : 10}); */
     /* await findEntry(collection, 'find') */
     /* await showallEntries(collection) */
-    await updateEntrybyID(collection, 'new ObjectId("629cceb6c4285b32db42e0f0")',{$set: {inventory_name: "updated"}})
+    /*await updateEntrybyName(collection, 'test', {inventory_name: "updated"})*/
+    /* await addEntry(collection, {inventory_name: 'tobedeleted', storage_date: '2003-08-25', inventory_amount: 9}) */
+    /* await deleteEntrybyName(collection, 'tobedeleted') */
 
 
 
@@ -62,7 +65,7 @@ async function addEntry(collections, inventoryObject){
   
 }
 
-async function findEntry(collections, inventory_name){
+async function showEntry(collections, inventory_name){
   const entry = await collections.findOne({"inventory_name": inventory_name})
   if(entry){
     console.log(`Found an entry with the name ${inventory_name}.`)
@@ -78,15 +81,27 @@ async function showallEntries(collections){
   console.log(allentries)
 }
 
-async function updateEntrybyID(collections, id, inventory_object){
-  if(id == ''){
-    console.log('Id cannot be blank.')
+async function updateEntrybyName(collections, name, inventory_object){
+  if(name == ''){
+    console.log('Name cannot be blank.')
   }
   else{
-    const updateEntry = await collections.findOneAndUpdate({ _id: id },{ $set:{inventory_amount: 2}})
+    const updateEntry = await collections.findOneAndUpdate({ inventory_name: "Test" },{ $set: inventory_object})
+    console.log(`Updated ${updateEntry}`)
   }
 }
 
+async function deleteEntrybyName(collections, name){
+  //Need to add comments to this.
+  if(name == ''){
+    console.log('Name cannot be blank.')
+  }
+  else{
+    const result = await collections.deleteOne({inventory_name: name})
+    console.log(`Deleted document with the inventory_name ${name}.`)
+  }
+  
+}
 
 
 
