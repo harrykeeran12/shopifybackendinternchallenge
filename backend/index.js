@@ -26,6 +26,7 @@ const client = new MongoClient(uri);
 client.connect().then((client) =>{
   database = client.db("logistics");
   collection = database.collection('inventory');
+  console.log('Connected to database.')
 })
 
 /* Database functions: */
