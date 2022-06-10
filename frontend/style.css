@@ -60,9 +60,7 @@ body{
   text-decoration: underline 2px var(--stroke);
   color: var(--headings);
 }
-.heading:last-child{
-  text-decoration: none;
-}
+
 .heading, .table-row div, input[type='checkbox']{
   width: 50%;
 }
@@ -70,7 +68,7 @@ body{
   display: none;
 } */
 .update:hover{
-  color: var(--bg2);
+  color: var(--cardbg);
 }
 .delete:hover{
   color: red;
