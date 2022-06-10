@@ -1,3 +1,6 @@
+/* NEED TO REPLACE THE URLS WHEN PRODUCTION */
+
+
 
 /* Populate database. */
 const loadDataurl = 'http://localhost:3001/all'
@@ -6,30 +9,53 @@ axios.get(loadDataurl).then(
   data=>{
     entriesarray = data['data'];
     entriesarray.forEach(entry => {
-      console.log(entry)
-      let iD = entry['_id'];
-      let name = entry['inventory_name'];
-      let amount = entry['inventory_amount'];
-      let date = entry['storage_date']
-      console.log(iD, name, amount, date)
-      let newDiv1 = document.createElement("div");
-      let newDiv2 = document.createElement("div");
-      let newDiv3 = document.createElement("div");
-      let newDiv4 = document.createElement("div");
-      let id_text = document.createTextNode(iD);
-      let name_text = document.createTextNode(name);
-      let amount_text = document.createTextNode(amount);
-      let date_text = document.createTextNode(date);
-      newDiv1.appendChild(id_text)
-      newDiv2.appendChild(name_text)
-      newDiv3.appendChild(amount_text)
-      newDiv4.appendChild(date_text)
-      table[0].appendChild(newDiv1);
-      table[0].appendChild(newDiv2);
-      table[0].appendChild(newDiv3);
-      table[0].appendChild(newDiv4);
+      Object.values(entry).forEach(e => {
+        let newDiv = document.createElement("div");
+        if (e == entry['storage_date']) {
+          let date_text = document.createTextNode(new Date(e).toDateString());
+          newDiv.appendChild(date_text)
+          table[0].appendChild(newDiv)
+          console.log('date')
+        } 
+        else {
+            let field_text = document.createTextNode(e);
+            newDiv.appendChild(field_text)
+            table[0].appendChild(newDiv)
+        }
+      });
 
     });
 
   }
 ) 
+
+/* Add a new item. */
+
+const sendEntryurl = 'http://localhost:3001/send';
+var submitbutton = document.querySelector('input[type=submit]')
+submitbutton.addEventListener('click', async(e) => {
+  let inventory_name = document.querySelector('input[name=inventory_name]')
+  let storage_date = document.querySelector('input[name=storage_date]')
+  let amount = document.querySelector('input[name=amount]')
+  let formData = {
+    "name": inventory_name.value.toString(), 
+    "date": storage_date.value.toString(),
+    "amount": parseInt(amount.value)
+  }
+  if(parseInt(amount.value) < 0){
+    alert('The number is less than 0. It cannot be submitted.')
+  }
+  else{
+    console.log(formData)
+      axios.post(sendEntryurl, formData).then((res)=>{
+        console.log(res)
+  })
+  }
+  
+})
+
+/* Update a new item. */
+
+
+
+

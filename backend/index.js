@@ -24,9 +24,10 @@ let server = {
 const uri = 'mongodb+srv://test:test@inventory.qpxdt.mongodb.net/?retryWrites=true&w=majority';
 const client = new MongoClient(uri);
 client.connect().then((client) =>{
+  console.log('Connected to database.')
   database = client.db("logistics");
   collection = database.collection('inventory');
-  console.log('Connected to database.')
+  
 })
 
 /* Database functions: */
@@ -105,7 +106,7 @@ app.post('/send', async function (req, res){
     res.send('Bad request, number is less than 0.')
   } 
   else {
-    console.log(inventory_object)
+    console.log(`Adding ${inventory_object} to the database.`)
     const entry = await addEntry(collection, inventory_object)
     res.send(entry);
   }

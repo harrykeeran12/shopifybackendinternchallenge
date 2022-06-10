@@ -19,14 +19,16 @@
       <div class="table">
         <div class="heading">ID</div>
         <div class="heading">Inventory Name</div>
-        <div class="heading">Inventory Amount</div>
         <div class="heading">Storage Date</div>
+        <div class="heading">Inventory Amount</div>
       </div>
-      <table>
-        <tbody id="tablebody">
-          
-        </tbody>
-      </table>
+      <form id="new_entry" onsubmit="return false">
+        <input type="text" name="inventory_name" placeholder="inventory name"/>
+        <input type="date" name="storage_date"/>
+        <input type="number" name="amount" placeholder="enter a number"/>
+        <input type="submit" value="Submit New Entry"/>
+      </form>
+      <p>Hello world.</p>
     </main>
   </div>
 </body>
