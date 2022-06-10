@@ -8,23 +8,38 @@ let table = document.getElementsByClassName('table');
 axios.get(loadDataurl).then(
   data=>{
     entriesarray = data['data'];
+    
     entriesarray.forEach(entry => {
+      let tableRow = document.createElement('div')
+      tableRow.className = 'table-row'
+      let checkrow = document.createElement('div')
+      let check = document.createElement('input')
+      check.type = 'checkbox'
       Object.values(entry).forEach(e => {
         let newDiv = document.createElement("div");
         if (e == entry['storage_date']) {
-          let date_text = document.createTextNode(new Date(e).toDateString());
-          newDiv.appendChild(date_text)
-          table[0].appendChild(newDiv)
-          console.log('date')
-        } 
-        else {
-            let field_text = document.createTextNode(e);
-            newDiv.appendChild(field_text)
-            table[0].appendChild(newDiv)
+          let field_text = document.createTextNode(new Date(e).toDateString());
+          newDiv.className = 'date';
+          newDiv.appendChild(field_text)
         }
+        else if(e == entry['_id']){
+          let field_text = document.createTextNode(e);
+           newDiv.className = 'id';
+           newDiv.appendChild(field_text)
+        }
+        else {
+          let field_text = document.createTextNode(e);
+          newDiv.appendChild(field_text)
+            
+        }
+        
+        tableRow.appendChild(newDiv)
+        checkrow.appendChild(check)
+        tableRow.appendChild(checkrow)
       });
-
-    });
+        table[0].appendChild(tableRow)
+    }
+    );
 
   }
 ) 
@@ -54,8 +69,16 @@ submitbutton.addEventListener('click', async(e) => {
   
 })
 
-/* Update a new item. */
+/* Update an item. */
 
+function updateItem(){
+  const updateurl = 'http://localhost:3001/send';
 
+}
 
+/* Delete an item. */
+
+function deleteItem(){
+
+}
 
