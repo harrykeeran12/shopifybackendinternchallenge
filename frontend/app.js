@@ -2,6 +2,8 @@
 
 
 
+
+
 /* Populate database. */
 const loadDataurl = 'http://localhost:3001/all'
 let table = document.getElementsByClassName('table');
@@ -70,15 +72,52 @@ submitbutton.addEventListener('click', async(e) => {
 })
 
 /* Update an item. */
+const updateButton = document.querySelector('.update');
+updateButton.addEventListener('click', updateItem)
 
+/* Function to get a list of selected entries, for updating or deleting. */
+
+function getSelected(){
+  const checkboxesArray = document.querySelectorAll('input[type=checkbox]');
+  const selectedArray = [];
+  let namesArray = [];
+  checkboxesArray.forEach(element => {
+    if(element.checked){
+      selectedArray.push(element)
+      let tableRow = element.parentElement.parentElement;
+      let name = tableRow.childNodes[1].innerHTML;
+      namesArray.push(name)
+    }}
+  )
+  return [selectedArray, namesArray]
+
+}
 function updateItem(){
-  const updateurl = 'http://localhost:3001/send';
-
+  
+  const baseupdateurl = 'http://localhost:3001/update';
+  const selectedArray = getSelected()[0]
+  if (selectedArray.length != 0){
+    console.log(selectedArray)
+    alert(`Updating ${selectedArray.length} item/s.`)
+  }
+  else{
+    alert('Please select elements to update/delete.')
+  }
+  
 }
 
 /* Delete an item. */
-
+const deleteButton = document.querySelector('.delete');
+deleteButton.addEventListener('click', deleteItem)
 function deleteItem(){
-
+  const deleteUrl = 'http://localhost:3001/delete';
+  const names = getSelected()[1]
+  names.forEach(name => {
+    console.log(name)
+    axios.delete(deleteUrl + '/' + name).then(
+      alert(`${name} has been deleted from the database.`)
+    )
+  });
+  
 }
 

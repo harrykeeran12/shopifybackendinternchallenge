@@ -64,9 +64,9 @@ body{
 .heading, .table-row div, input[type='checkbox']{
   width: 50%;
 }
-/* .id{
+.id{
   display: none;
-} */
+}
 .update:hover{
   color: var(--cardbg);
 }
