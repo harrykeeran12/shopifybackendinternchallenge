@@ -73,6 +73,9 @@ body{
 .delete:hover{
   color: red;
 }
+.undo:hover{
+  color: green;
+}
 input[type='checkbox']{
   align-self: flex-end;
 

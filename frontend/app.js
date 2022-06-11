@@ -3,6 +3,8 @@
 
 
 
+
+
 /* Populate database. */
 const loadDataurl = 'http://localhost:3001/all'
 let table = document.getElementsByClassName('table');
@@ -96,9 +98,9 @@ const updateButton = document.querySelector('.update');
 updateButton.addEventListener('click', updateItem)
 
 function updateItem(){
-  
   const baseupdateurl = 'http://localhost:3001/update';
   const selectedArray = getSelected()[0]
+  
   if (selectedArray.length != 0){
     console.log(selectedArray)
     alert(`Updating ${selectedArray.length} item/s.`)
@@ -126,13 +128,22 @@ function deleteItem(){
       'name': name
     };
     axios.post(pushtoStack, namecomments).then((res)=>{
-      console.log(res)
-      axios.delete(deleteUrl + '/' + name).then(
-      alert(`${name} has been deleted from the database.`)
-    )})
+      if(res){
+        axios.delete(deleteUrl + '/' + name).then(()=>{
+          alert(`${name} has been deleted from the database.`)
+        })
+      }
+    })
+  })
+}
+
+const undoButton = document.querySelector('.undo');
+const undoURL = 'http://localhost:3001/popstack';
+undoButton.addEventListener('click', undoDelete)
+function undoDelete(){
+  axios.get(undoURL)
+  //Put something here to refresh the page.
+}
 
     
-  });
-  
-}
 

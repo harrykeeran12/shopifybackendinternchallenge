@@ -114,7 +114,7 @@ app.post('/send', async function (req, res){
   }
   
 });
-
+/*Route to push a value onto the stack database. */
 app.post('/stackpush', async function(req,res){ 
   let stacklength = await showallEntries(deletionstack);
   const entrytobeDeleted = await showEntry(collection, req.body['name']);
@@ -145,6 +145,30 @@ app.get('/all', async function (req,res){
   const entries = await showallEntries(collection)
   res.send(entries)
 });
+
+/*Route to pop a value from the stack*/
+app.get('/popstack', async function(req,res){
+  let stack = await showallEntries(deletionstack);
+  if(stack.length == 0){
+    res.send('The deletion stack is currently empty.')
+  }
+  stack.forEach(async function(doc){
+    if ((doc['stack_number'] == stack.length) && (stack.length != 0)) {
+      res.send(doc)
+      const oldLabel = {
+        '_id': doc['_id'],
+        'inventory_name': doc['inventory_name'],
+        'storage_date': doc['storage_date'],
+        'inventory_amount': parseInt(doc['inventory_amount'])
+      }
+      let newentry = await addEntry(collection, oldLabel);
+      var deletion = await deleteEntrybyName(deletionstack, doc['inventory_name']);
+    }
+  }
+  );
+  
+})
+
 
 /*UPDATE*/
 
