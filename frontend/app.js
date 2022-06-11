@@ -1,10 +1,6 @@
 /* NEED TO REPLACE THE URLS WHEN PRODUCTION */
 
 
-
-
-
-
 /* Populate database. */
 const loadDataurl = 'http://localhost:3001/all'
 let table = document.getElementsByClassName('table');
@@ -51,25 +47,29 @@ axios.get(loadDataurl).then(
 
 const sendEntryurl = 'http://localhost:3001/send';
 var submitbutton = document.querySelector('input[type=submit]')
+let update = false;
 submitbutton.addEventListener('click', async(e) => {
-  let inventory_name = document.querySelector('input[name=inventory_name]')
-  let storage_date = document.querySelector('input[name=storage_date]')
-  let amount = document.querySelector('input[name=amount]')
-  let formData = {
-    "name": inventory_name.value.toString(), 
-    "date": storage_date.value.toString(),
-    "amount": parseInt(amount.value)
+  if(update == false){
+    let inventory_name = document.querySelector('input[name=inventory_name]')
+    let storage_date = document.querySelector('input[name=storage_date]')
+    let amount = document.querySelector('input[name=amount]')
+    let formData = {
+      "name": inventory_name.value.toString(), 
+      "date": storage_date.value.toString(),
+      "amount": parseInt(amount.value)
+    }
+    if(parseInt(amount.value) < 0){
+      alert('The number is less than 0. It cannot be submitted.')
+    }
+    else{
+      console.log(formData)
+        axios.post(sendEntryurl, formData).then((res)=>{
+          console.log(res)
+          alert(`Entry with name ${formData['name']}, at date ${formData['date']} and amount ${formData['amount']} has been added to the database.`)
+    })
+    }
   }
-  if(parseInt(amount.value) < 0){
-    alert('The number is less than 0. It cannot be submitted.')
-  }
-  else{
-    console.log(formData)
-      axios.post(sendEntryurl, formData).then((res)=>{
-        console.log(res)
-        alert(`Entry with name ${formData['name']}, at date ${formData['date']} and amount ${formData['amount']} has been added to the database.`)
-  })
-  }
+  
   
 })
 
@@ -81,15 +81,17 @@ function getSelected(){
   const checkboxesArray = document.querySelectorAll('input[type=checkbox]');
   const selectedArray = [];
   let namesArray = [];
+  let tableRowArray = [];
   checkboxesArray.forEach(element => {
     if(element.checked){
       selectedArray.push(element)
       let tableRow = element.parentElement.parentElement;
+      tableRowArray.push(tableRow)
       let name = tableRow.childNodes[1].innerHTML;
       namesArray.push(name)
     }}
   )
-  return [selectedArray, namesArray]
+  return [selectedArray, namesArray, tableRowArray]
 
 }
 
@@ -99,11 +101,60 @@ updateButton.addEventListener('click', updateItem)
 
 function updateItem(){
   const baseupdateurl = 'http://localhost:3001/update';
-  const selectedArray = getSelected()[0]
+  const selectedArray = getSelected()[2];
+  const namesArray = getSelected()[1];
   
   if (selectedArray.length != 0){
-    console.log(selectedArray)
-    alert(`Updating ${selectedArray.length} item/s.`)
+    update = true
+    let inventory_name = document.querySelector('input[name=inventory_name]')
+    let storage_date = document.querySelector('input[name=storage_date]')
+    let amount = document.querySelector('input[name=amount]')
+    for (let i = 0; i < selectedArray.length; i++) {
+      const insideElements = selectedArray[i].children;
+      tempDate = new Date(insideElements[2].innerHTML)
+      let month = tempDate.getMonth().toString()
+      let day = tempDate.getDate().toString()
+      if(tempDate.getMonth() < 10){
+        month = '0' + tempDate.getMonth().toString()
+      }
+      if(tempDate.getDay() < 10){
+        date = '0' + tempDate.getDate().toString()
+      }
+      
+      inventory_name.value = insideElements[1].innerHTML;
+      storage_date.value = `${tempDate.getFullYear()}-${month}-${day}`
+      amount.value = insideElements[3].innerHTML;
+      console.log(new Date(storage_date.value).toString())
+      /* Change submit button to send data*/
+      if (update == true) {
+        submitbutton.value = 'Update entry.'
+        submitbutton.addEventListener('click', async function(){
+          let updateEntry = {}
+          /* Appending values to object*/
+          if ((inventory_name.value != insideElements[1].innerHTML) && (inventory_name.value != '')){
+            Object.assign(updateEntry, {'inventory_name' : inventory_name.value});
+          }
+          if ((amount.value != insideElements[3].innerHTML) && (amount.value != '')){
+            Object.assign(updateEntry, {'inventory_amount' : amount.value});
+          }
+          if ((storage_date.value != new Date(storage_date.value).toString()) && (storage_date.value != '')){
+            Object.assign(updateEntry, {'storage_date' : new Date(storage_date.value).toString()});
+          }
+          console.log(updateEntry)
+          let name = namesArray[i]
+          axios.put(baseupdateurl + '/' + name, updateEntry)
+          update = false
+          
+
+        })
+      }
+      console.log(new Date(insideElements[2].innerHTML))      
+    }
+    
+    //alert(`Updating ${selectedArray.length} item/s.`)
+  }
+  else if(selectedArray.length > 1){
+    alert('Please only select one item to be updated at a time.')
   }
   else{
     alert('Please select elements to update/delete.')
