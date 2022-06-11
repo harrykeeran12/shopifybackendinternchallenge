@@ -8,7 +8,7 @@ const express = require('express');
 const cors = require('cors');
 const bodyparser = require('body-parser');
 
-const {MongoClient} = require('mongodb');
+const {MongoClient, ConnectionClosedEvent} = require('mongodb');
 
 app = express()
 
@@ -27,6 +27,8 @@ client.connect().then((client) =>{
   console.log('Connected to database.')
   database = client.db("logistics");
   collection = database.collection('inventory');
+  deletionstack = database.collection('deletionstack');
+  
   
 })
 
@@ -112,6 +114,18 @@ app.post('/send', async function (req, res){
   }
   
 });
+
+app.post('/stackpush', async function(req,res){ 
+  let stacklength = await showallEntries(deletionstack);
+  const entrytobeDeleted = await showEntry(collection, req.body['name']);
+  console.log(stacklength.length)
+  const comments = {'comments': req.body['comments'], 'stack_number': stacklength.length + 1}
+  const deletion = Object.assign(comments, entrytobeDeleted)
+  const stackpush = await addEntry(deletionstack, deletion).then(()=>{
+    console.log('Added to stack.')
+    res.send('Added to stack.')
+  })
+})
 
 /*READ*/
 

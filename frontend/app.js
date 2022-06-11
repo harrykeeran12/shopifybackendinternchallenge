@@ -3,7 +3,6 @@
 
 
 
-
 /* Populate database. */
 const loadDataurl = 'http://localhost:3001/all'
 let table = document.getElementsByClassName('table');
@@ -66,14 +65,13 @@ submitbutton.addEventListener('click', async(e) => {
     console.log(formData)
       axios.post(sendEntryurl, formData).then((res)=>{
         console.log(res)
+        alert(`Entry with name ${formData['name']}, at date ${formData['date']} and amount ${formData['amount']} has been added to the database.`)
   })
   }
   
 })
 
-/* Update an item. */
-const updateButton = document.querySelector('.update');
-updateButton.addEventListener('click', updateItem)
+
 
 /* Function to get a list of selected entries, for updating or deleting. */
 
@@ -92,6 +90,11 @@ function getSelected(){
   return [selectedArray, namesArray]
 
 }
+
+/* Update an item. */
+const updateButton = document.querySelector('.update');
+updateButton.addEventListener('click', updateItem)
+
 function updateItem(){
   
   const baseupdateurl = 'http://localhost:3001/update';
@@ -109,14 +112,26 @@ function updateItem(){
 /* Delete an item. */
 const deleteButton = document.querySelector('.delete');
 deleteButton.addEventListener('click', deleteItem)
+
 function deleteItem(){
   const deleteUrl = 'http://localhost:3001/delete';
+  const pushtoStack = 'http://localhost:3001/stackpush'
   const names = getSelected()[1]
   names.forEach(name => {
     console.log(name)
-    axios.delete(deleteUrl + '/' + name).then(
+    /* Need to add a way of getting the user comments, and saving them to the database, such that I can undo any deletions. The comments can be done using a prompt, whilst I will also need to grab the data of the deleted entry right before it is deleted. */
+    var comment = prompt(`Please add any comments to accompany the deletion of ${name}.`)
+    var namecomments = {
+      'comments': comment,
+      'name': name
+    };
+    axios.post(pushtoStack, namecomments).then((res)=>{
+      console.log(res)
+      axios.delete(deleteUrl + '/' + name).then(
       alert(`${name} has been deleted from the database.`)
-    )
+    )})
+
+    
   });
   
 }
