@@ -1,8 +1,14 @@
 /* NEED TO REPLACE THE URLS WHEN PRODUCTION */
 
+ const url = 'http://localhost:3001';
 
+function refreshPage(time){
+  setTimeout(()=>{
+    location.reload()
+  }, time)
+}
 /* Populate database. */
-const loadDataurl = 'http://localhost:3001/all'
+const loadDataurl = url + '/all'
 let table = document.getElementsByClassName('table');
 axios.get(loadDataurl).then(
   data=>{
@@ -45,11 +51,12 @@ axios.get(loadDataurl).then(
 
 /* Add a new item. */
 
-const sendEntryurl = 'http://localhost:3001/send';
+const sendEntryurl = url + '/send';
 var submitbutton = document.querySelector('input[type=submit]')
 let update = false;
 submitbutton.addEventListener('click', async(e) => {
   if(update == false){
+    submitbutton.value = 'Submit New Entry'
     let inventory_name = document.querySelector('input[name=inventory_name]')
     let storage_date = document.querySelector('input[name=storage_date]')
     let amount = document.querySelector('input[name=amount]')
@@ -100,7 +107,7 @@ const updateButton = document.querySelector('.update');
 updateButton.addEventListener('click', updateItem)
 
 function updateItem(){
-  const baseupdateurl = 'http://localhost:3001/update';
+  const baseupdateurl = url + '/update';
   const selectedArray = getSelected()[2];
   const namesArray = getSelected()[1];
   
@@ -142,13 +149,13 @@ function updateItem(){
           }
           console.log(updateEntry)
           let name = namesArray[i]
-          axios.put(baseupdateurl + '/' + name, updateEntry)
+          axios.put(baseupdateurl + '/' + name, updateEntry).then(refreshPage(1000))
           update = false
           
 
         })
       }
-      console.log(new Date(insideElements[2].innerHTML))      
+      console.log(new Date(insideElements[2].innerHTML))     
     }
     
     //alert(`Updating ${selectedArray.length} item/s.`)
@@ -167,8 +174,8 @@ const deleteButton = document.querySelector('.delete');
 deleteButton.addEventListener('click', deleteItem)
 
 function deleteItem(){
-  const deleteUrl = 'http://localhost:3001/delete';
-  const pushtoStack = 'http://localhost:3001/stackpush'
+  const deleteUrl = url + '/delete';
+  const pushtoStack = url + '/stackpush'
   const names = getSelected()[1]
   names.forEach(name => {
     console.log(name)
@@ -178,6 +185,7 @@ function deleteItem(){
       'comments': comment,
       'name': name
     };
+    console.log(namecomments)
     axios.post(pushtoStack, namecomments).then((res)=>{
       if(res){
         axios.delete(deleteUrl + '/' + name).then(()=>{
@@ -186,15 +194,29 @@ function deleteItem(){
       }
     })
   })
+  refreshPage(1000);
+
 }
 
 const undoButton = document.querySelector('.undo');
-const undoURL = 'http://localhost:3001/popstack';
+const undoURL = url + '/popstack';
 undoButton.addEventListener('click', undoDelete)
 function undoDelete(){
-  axios.get(undoURL)
+  axios.get(undoURL).then(refreshPage(1000))
   //Put something here to refresh the page.
+
 }
+
+const addButton = document.querySelector('.add');
+
+addButton.addEventListener('click', function(){
+  const formdata = document.getElementById('new_entry')
+  if('hidden' in formdata.classList){
+    formdata.classList.toggle('hidden')
+  }
+  else{
+    formdata.classList.toggle('hidden')
+  }})
 
     
 

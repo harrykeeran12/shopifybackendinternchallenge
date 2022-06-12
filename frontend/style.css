@@ -76,9 +76,17 @@ body{
 .undo:hover{
   color: green;
 }
+.add:hover{
+  color: green;
+}
+i{
+  padding: 10px;
+}
 input[type='checkbox']{
   align-self: flex-end;
-
+}
+.hidden{
+  display: none;
 }
 form{
   width: 100%;

@@ -8,13 +8,18 @@ const express = require('express');
 const cors = require('cors');
 const bodyparser = require('body-parser');
 
-const {MongoClient, ConnectionClosedEvent} = require('mongodb');
+const {MongoClient} = require('mongodb');
 
 app = express()
+const directoryName = __dirname;
+const frontendPath = directoryName.replace('/backend', '/frontend')
+
+console.log()
 
 /*Uses the dependencies cors and body-parser, so that the output is more readable. */
 app.use(cors())
 app.use(bodyparser.json())
+app.use(express.static(frontendPath))
 
 /*Assigns a port number. */
 let server = { 
@@ -62,7 +67,7 @@ async function updateEntrybyName(collections, name, inventory_object){
   }
   else{
     const updateEntry = await collections.findOneAndUpdate({ inventory_name: name },{ $set: inventory_object}).then(()=>{
-      console.log('Found.')
+      console.log(`Found and updated entry with name ${name}`)
     }, ()=>{
       console.log('Not found.')
     })
@@ -121,14 +126,17 @@ app.post('/stackpush', async function(req,res){
   console.log(stacklength.length)
   const comments = {'comments': req.body['comments'], 'stack_number': stacklength.length + 1}
   const deletion = Object.assign(comments, entrytobeDeleted)
-  const stackpush = await addEntry(deletionstack, deletion).then(()=>{
+  const stackpush = await addEntry(deletionstack, deletion).then(async function(){
     console.log('Added to stack.')
     res.send('Added to stack.')
   })
 })
 
 /*READ*/
-
+/*Runs the frontend portion of the server. */
+app.get('/', function(req,res){
+  res.sendFile(frontendPath + '/index.html')
+})
 /*Route to get one specific value */
 app.get('/api/:name', async function (req,res){
   const entry = await showEntry(collection, req.params.name)
