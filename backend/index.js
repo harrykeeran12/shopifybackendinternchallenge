@@ -7,6 +7,7 @@ This file needs to house a create(POST method), read(GET method), update(PUT met
 const express = require('express');
 const cors = require('cors');
 const bodyparser = require('body-parser');
+const dotenv = require('dotenv').config();
 
 const {MongoClient} = require('mongodb');
 
@@ -26,7 +27,8 @@ let server = {
   port: 3001
 }
 
-const uri = 'mongodb+srv://test:test@inventory.qpxdt.mongodb.net/?retryWrites=true&w=majority';
+const uri = process.env.DATABASE_URI;
+
 const client = new MongoClient(uri);
 client.connect().then((client) =>{
   console.log('Connected to database.')
